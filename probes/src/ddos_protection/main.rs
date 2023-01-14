@@ -1,6 +1,22 @@
+// 
+// Copyright (C) 2023, Aayush Atharva
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
 #![no_std]
 #![no_main]
-// use cty::*;
 
 use redbpf_probes::net::Transport;
 use redbpf_probes::maps::{LruHashMap, HashMap};
@@ -9,18 +25,6 @@ use redbpf_probes::xdp::prelude::*;
 use probes::ddos_protection::SAddrV4;
 
 program!(0xFFFFFFFE, "GPL");
-
-/*
-#[xdp]
-pub fn block_port_80(ctx: XdpContext) -> XdpResult {
-    if let Ok(transport) = ctx.transport() {
-        if transport.dest() == 80 {
-            return Ok(XdpAction::Drop);
-        }
-    }
-    Ok(XdpAction::Pass)
-}
-*/
 
 type Ipv4Addr = u32;
 type DummyValue = u8;
@@ -47,8 +51,6 @@ static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_en
 
 #[map]
 static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_000_000);
-
-// TODO: static mut LOCK: bpf_spin_lock = bpf_spin_lock { val: 0 };
 
 pub static STEAM_PACKET_START: [u8; 4] = *b"\xff\xff\xff\xff";
 pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
@@ -136,16 +138,6 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         }
     }
 
-    // unsafe {
-    //     bpf_spin_lock(&mut LOCK);
-    // }
-
-    // defer_lite::defer! {
-    //     unsafe {
-    //         bpf_spin_unlock(&mut LOCK);
-    //     }
-    // }
-
     if unsafe { WHITELIST.get(&saddr) }.is_some() {
         return Ok(XdpAction::Pass);
     }
@@ -187,3 +179,5 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
 
     Ok(XdpAction::Drop)
 }
+
+// SPDX-License-Identifier: GPL-3.0-or-later

@@ -6,8 +6,10 @@
 # Build probe:
 
 ```bash
-sbpf$ cd probes
-sbpf/probes$ cargo bpf build --target-dir=../target
+$ cd probes
+$ cargo b
+/probes$ cargo bpf build --target-dir=../target
+
 ```
 
 # Run it:
