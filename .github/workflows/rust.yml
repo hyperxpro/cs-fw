@@ -36,11 +36,11 @@ jobs:
        version: "14"
     - name: Build Cargo-BPF
       run: cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
-    - name: Build CS-FW
+    - name: Build CS-FW Probes
       run: |
         cd probes
         cargo build
         cargo bpf build --target-dir=../target
-        cd ..
-        cargo build
+    - name: Build CS-FW
+      run: cargo build
 
