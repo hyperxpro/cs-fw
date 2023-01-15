@@ -8,7 +8,7 @@ $ sudo .csfw -i eth0 -p 127.0.0.1:11011
 
 ### Unload
 ```bash
-# sudo ip link set dev eth0 xdp off
+$ sudo ip link set dev eth0 xdp off
 ```
 
 ### Building from Source:
