@@ -22,6 +22,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Packages
+      run: apt install libelf-dev pkg-config
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v1
       with:
