@@ -22,14 +22,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Remove Latest Rust
-      run: rustup self uninstall -y
     - name: Install Packages
       run: sudo apt install libelf-dev pkg-config -qy
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v1
       with:
        version: "14"
+    - name: Remove Latest Rust
+      run: rustup self uninstall -y
     - name: Install Rust 1.56
       run: rustup install 1.56
     - name: Build Cargo-BPF
