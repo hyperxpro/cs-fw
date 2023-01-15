@@ -28,10 +28,10 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
        version: "14"
-    - name: Install latest nightly
-      uses: actions-rs/toolchain@v1
-      with:
-          toolchain: 1.56
+    - name: Remove Latest Rust
+      run: rustup self uninstall
+    - name: Install Rust 1.56
+      run: rustup install 1.56
     - name: Build Cargo-BPF
       run: cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
     - name: Build CS-FW
