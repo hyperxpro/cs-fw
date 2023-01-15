@@ -16,7 +16,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  Build:
 
     runs-on: ubuntu-latest
 
@@ -42,5 +42,11 @@ jobs:
         cargo build
         cargo bpf build --target-dir=../target
     - name: Build CS-FW
-      run: cargo build
+      run: cargo build --release
+    - name: Upload the build
+      uses: actions/upload-artifact@v3
+      with:
+        name: CS-FW Build
+        path: /home/runner/work/cs-fw/target/release/
+          
 
