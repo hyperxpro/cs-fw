@@ -41,4 +41,6 @@ jobs:
         cd probes
         cargo build
         cargo bpf build --target-dir=../target
+        cd ..
+        cargo build
 
