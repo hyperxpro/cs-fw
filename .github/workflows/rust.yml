@@ -27,7 +27,7 @@ jobs:
     - name: Install Rust 1.56
       run: |
         wget -O rustup-init.sh https://sh.rustup.rs/
-        sh rustup-init.sh -s --default-toolchain=1.54.0 -y
+        sh rustup-init.sh --default-toolchain=1.54.0 -y
     - name: Install Packages
       run: sudo apt install libelf-dev pkg-config -qy
     - name: Install LLVM and Clang
