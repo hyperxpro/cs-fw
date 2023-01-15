@@ -45,13 +45,13 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 }
 
 #[map]
-static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(1_00_000);
+static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(10240);
 
 #[map]
-static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(1_00_000);
+static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10240);
 
 #[map]
-static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(100_000_000);
+static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10240);
 
 pub static STEAM_PACKET_START: [u8; 4] = *b"\xff\xff\xff\xff";
 pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
