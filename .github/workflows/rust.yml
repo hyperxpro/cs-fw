@@ -34,4 +34,5 @@ jobs:
       run: |
         cd probes
         cargo build
+        cargo bpf build --target-dir=../target
 
