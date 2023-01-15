@@ -47,5 +47,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: CS-FW Build
-        path: /home/runner/work/cs-fw/cs-fw/target/release/
+        path: /home/runner/work/cs-fw/cs-fw/target/release/csfw
         if-no-files-found: error
