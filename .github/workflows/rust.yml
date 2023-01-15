@@ -31,7 +31,7 @@ jobs:
     - name: Remove Latest Rust
       run: rustup self uninstall -y
     - name: Install Rust 1.56
-      run: rustup install 1.56
+      run: curl --proto '=https' --tls1.2 -sSf https://sh.rustup.rs/ | sh -s --default-toolchain=1.56.0
     - name: Build Cargo-BPF
       run: cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
     - name: Build CS-FW
