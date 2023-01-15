@@ -1,25 +1,15 @@
-# Deps:
+# CS-FW
+CS-FW is a high-performance CS 1.6 firewall based on Linux XDP.
 
-* LLVM 14 (llvm-config --version should print 14.y.z)
-* cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
-
-# Build probe:
-
+### Run:
 ```bash
-$ cd probes
-$ cargo b
-/probes$ cargo bpf build --target-dir=../target
-
+$ sudo .csfw -i eth0 -p 127.0.0.1:11011
 ```
 
-# Run it:
-
+### Unload
 ```bash
-sbpf$ cargo b && sudo ./target/debug/csfw -i lo -p 127.0.0.1:11011
+# ip link set dev eth0 xdp off
 ```
 
-# Unload
-
-```bash
-# ip link set dev lo xdp off
-```
+### Building from Source:
+See CI [Workflow file](https://github.com/hyperxpro/cs-fw/blob/main/.github/workflows/build.yml) for more details.

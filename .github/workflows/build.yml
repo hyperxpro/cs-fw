@@ -48,5 +48,4 @@ jobs:
       with:
         name: CS-FW Build
         path: /home/runner/work/cs-fw/target/release/
-          
-
+        if-no-files-found: error
