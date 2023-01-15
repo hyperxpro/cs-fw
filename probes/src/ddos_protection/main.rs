@@ -33,6 +33,7 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
     if s.len() < N {
         return false;
     }
+    
     let mut i = 0;
     while i < N {
         if s[i] != needle[i] {
@@ -44,13 +45,13 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 }
 
 #[map]
-static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(10240);
+static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(1_00_000);
 
 #[map]
-static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10240);
+static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(1_00_000);
 
 #[map]
-static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_000_000);
+static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(100_000_000);
 
 pub static STEAM_PACKET_START: [u8; 4] = *b"\xff\xff\xff\xff";
 pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
@@ -64,20 +65,19 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         return Err(NetworkError::NoIPHeader);
     };
 
-    // check IP version v4
+    // We only care about IPv4 packets. We will pass IPv6 packets seamlessly.
     if iph.version() != 4 {
-        // We don't deal with IPv6
         return Ok(XdpAction::Pass);
     }
 
-    let saddr = iph.saddr;
-    let daddr = iph.daddr;
+    let source_address = iph.saddr;
+    let destination_address = iph.daddr;
 
     drop(iph);
 
     let transport = ctx.transport()?;
 
-    // Pass TCP packets
+    // We only care about UDP packets. We will pass TCP packets seamlessly.
     if let Transport::TCP(_) = transport {
         return Ok(XdpAction::Pass);
     };
@@ -87,21 +87,20 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
 
     drop(transport);
 
-    let ssocket_addr = SAddrV4 { addr: saddr, port: sport as u32 };
-    let dsocket_addr = SAddrV4 { addr: daddr, port: dport as u32 };
+    let source_socket_address = SAddrV4 { addr: source_address, port: sport as u32 };
+    let destination_socket_address = SAddrV4 { addr: destination_address, port: dport as u32 };
 
-    if unsafe { PROXYLIST.get(&ssocket_addr) }.is_some() {
+    if unsafe { PROXYLIST.get(&source_socket_address) }.is_some() {
         // It is going from a proxy, so Pass
         return Ok(XdpAction::Pass);
     }
 
-    if unsafe { PROXYLIST.get(&dsocket_addr) }.is_none() {
+    if unsafe { PROXYLIST.get(&destination_socket_address) }.is_none() {
         // It is not going to a proxy, so Pass
         return Ok(XdpAction::Pass);
     }
 
     let data = ctx.data()?;
-
     let payload_len = data.len();
 
     if payload_len < (STEAM_PACKET_START.len() + 1) {
@@ -109,7 +108,6 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     }
 
     let payload = data.slice(STEAM_PACKET_START.len() + 1)?;
-
     let is_steam_packet = starts_with(payload, STEAM_PACKET_START);
 
     let is_query_request_packet = match payload[4] {
@@ -120,7 +118,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     };
 
     // A2S_RESPONSES ATTACK
-    let is_unlegit_request_packet = match payload[4] {
+    let is_illegitimate_request_packet = match payload[4] {
         0x49 => true, // A2S_INFO_RESPONSE
         0x45 => true, // A2S_RULES_RESPONSE
         0x44 => true, // A2S_PLAYERS_RESPONSE
@@ -131,14 +129,13 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
 
     if is_steam_packet {
         if is_query_request_packet {
-            // TODO: whitelist even these packets
             return Ok(XdpAction::Pass);
-        } else if is_unlegit_request_packet {
+        } else if is_illegitimate_request_packet {
             return Ok(XdpAction::Drop);
         }
     }
 
-    if unsafe { WHITELIST.get(&saddr) }.is_some() {
+    if unsafe { WHITELIST.get(&source_address) }.is_some() {
         return Ok(XdpAction::Pass);
     }
 
@@ -150,12 +147,12 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     let is_packet1 = starts_with(payload, PACKET1_START);
 
     if is_packet1 {
-        if unsafe { TEMPLIST.get(&saddr) }.is_none() {
+        return if unsafe { TEMPLIST.get(&source_address) }.is_none() {
             let dummy_value = 0;
-            unsafe { TEMPLIST.set(&saddr, &dummy_value) };
-            return Ok(XdpAction::Pass);
+            unsafe { TEMPLIST.set(&source_address, &dummy_value) };
+            Ok(XdpAction::Pass)
         } else {
-            return Ok(XdpAction::Drop);
+            Ok(XdpAction::Drop)
         }
     }
 
@@ -167,17 +164,17 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     let is_packet2 = starts_with(payload, PACKET2_START);
 
     if is_packet2 {
-        if unsafe { TEMPLIST.get(&saddr) }.is_some() {
-            unsafe { TEMPLIST.delete(&saddr) };
+        return if unsafe { TEMPLIST.get(&source_address) }.is_some() {
+            unsafe { TEMPLIST.delete(&source_address) };
             let dummy_value = 0;
-            unsafe { WHITELIST.set(&saddr, &dummy_value) };
-            return Ok(XdpAction::Pass);
+            unsafe { WHITELIST.set(&source_address, &dummy_value) };
+            Ok(XdpAction::Pass)
         } else {
-            return Ok(XdpAction::Drop);
+            Ok(XdpAction::Drop)
         }
     }
 
     Ok(XdpAction::Drop)
 }
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0

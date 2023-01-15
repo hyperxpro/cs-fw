@@ -18,4 +18,4 @@
 #![no_std]
 pub mod ddos_protection;
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0

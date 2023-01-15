@@ -26,6 +26,7 @@ struct Args {
     /// Name of the interface to attach to
     #[clap(short, long)]
     interface: String,
+
     /// The address of the proxy in format IPv4:PORT
     #[clap(short, long)]
     proxy: SocketAddrV4,
@@ -45,7 +46,7 @@ fn probe_code() -> &'static [u8] {
     ))
 }
 
-fn main() -> std::result::Result<(), String> {
+fn main() -> Result<(), String> {
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
         .with_max_level(tracing::Level::TRACE)
         .finish();
@@ -65,21 +66,18 @@ fn main() -> std::result::Result<(), String> {
         format!("{:?}", err)
     })?;
 
-    let proxy_map =
-        HashMap::<SAddrV4, u8>::new(loaded.map("PROXYLIST").expect("PROXYLIST map not found")).unwrap();
-
     let proxy = SAddrV4 {
         addr: u32::from_ne_bytes(args.proxy.ip().octets()).to_le(),
         port: (args.proxy.port() as u32).to_le(),
     };
+
+    let proxy_map = HashMap::<SAddrV4, u8>::new(loaded.map("PROXYLIST").expect("PROXYLIST map not found")).unwrap();
     proxy_map.set(proxy, /* dummy value */ 0);
 
-    println!(
-        "Attach ddos_protection on interface: {} with mode {:?}",
-        args.interface, xdp_mode
-    );
-    for prog in loaded.xdps_mut() {
-        prog.attach_xdp(&args.interface, xdp_mode)
+    println!( "Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode );
+    
+    for program in loaded.xdps_mut() {
+        program.attach_xdp(&args.interface, xdp_mode)
             .map_err(|err| {
                 dbg!(&err);
                 format!("{:?}", err)
@@ -90,4 +88,4 @@ fn main() -> std::result::Result<(), String> {
     std::process::exit(0);
 }
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0

@@ -22,4 +22,4 @@ pub struct SAddrV4 {
     pub port: u32, // u32 instead of u16 to align properly
 }
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0
