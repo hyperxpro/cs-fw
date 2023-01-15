@@ -1,16 +1,16 @@
-// 
+//
 // Copyright (C) 2023, Aayush Atharva
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
@@ -18,6 +18,7 @@
 use clap::Parser;
 use redbpf::{load::Loader, xdp, HashMap};
 use std::net::SocketAddrV4;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 /// Attach eBPF probes to deal with DDOS
 #[derive(Parser, Debug)]
@@ -59,8 +60,6 @@ fn main() -> Result<(), String> {
         std::process::exit(1);
     }
 
-    let xdp_mode = xdp::Flags::HwMode;
-
     let mut loaded = Loader::load(probe_code()).map_err(|err| {
         dbg!(&err);
         format!("{:?}", err)
@@ -74,11 +73,13 @@ fn main() -> Result<(), String> {
     let proxy_map = HashMap::<SAddrV4, u8>::new(loaded.map("PROXYLIST").expect("PROXYLIST map not found")).unwrap();
     proxy_map.set(proxy, /* dummy value */ 0);
 
-    println!( "Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode );
+    println!( "Attach ddos_protection on interface: {}", args.interface);
     
     for program in loaded.xdps_mut() {
-        program.attach_xdp(&args.interface, xdp_mode)
-            .map_err(|err| {
+        program.attach_xdp(&args.interface, xdp::Flags::HwMode)
+            .or_else(program.attach_xdp(&args.interface, xdp::Flags::DrvMode))
+            .or_else(program.attach_xdp(&args.interface, xdp::Flags::SkbMode))
+            .or_else(program.attach_xdp(&args.interface, xdp::Flags::default())).map_err(|err| {
                 dbg!(&err);
                 format!("{:?}", err)
             })?;

@@ -51,7 +51,7 @@ static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(1
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(1_00_000);
 
 #[map]
-static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(100_000_000);
+static mut TEMPLIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_000_000);
 
 pub static STEAM_PACKET_START: [u8; 4] = *b"\xff\xff\xff\xff";
 pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
