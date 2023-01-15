@@ -3,7 +3,7 @@ CS-FW is a high-performance CS 1.6 firewall based on Linux XDP.
 
 ### Run:
 ```bash
-$ sudo .csfw -i eth0 -p 127.0.0.1:11011
+$ sudo ./csfw -i eth0 -p 127.0.0.1:11011
 ```
 
 ### Unload
