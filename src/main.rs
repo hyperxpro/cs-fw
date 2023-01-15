@@ -18,7 +18,6 @@
 use clap::Parser;
 use redbpf::{load::Loader, xdp, HashMap};
 use std::net::SocketAddrV4;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 /// Attach eBPF probes to deal with DDOS
 #[derive(Parser, Debug)]
@@ -60,6 +59,8 @@ fn main() -> Result<(), String> {
         std::process::exit(1);
     }
 
+    let xdp_mode = xdp::Flags::default();
+
     let mut loaded = Loader::load(probe_code()).map_err(|err| {
         dbg!(&err);
         format!("{:?}", err)
@@ -73,13 +74,11 @@ fn main() -> Result<(), String> {
     let proxy_map = HashMap::<SAddrV4, u8>::new(loaded.map("PROXYLIST").expect("PROXYLIST map not found")).unwrap();
     proxy_map.set(proxy, /* dummy value */ 0);
 
-    println!( "Attach ddos_protection on interface: {}", args.interface);
+    println!( "Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode );
     
     for program in loaded.xdps_mut() {
-        program.attach_xdp(&args.interface, xdp::Flags::HwMode)
-            .or_else(program.attach_xdp(&args.interface, xdp::Flags::DrvMode))
-            .or_else(program.attach_xdp(&args.interface, xdp::Flags::SkbMode))
-            .or_else(program.attach_xdp(&args.interface, xdp::Flags::default())).map_err(|err| {
+        program.attach_xdp(&args.interface, xdp_mode)
+            .map_err(|err| {
                 dbg!(&err);
                 format!("{:?}", err)
             })?;
