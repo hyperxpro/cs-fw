@@ -57,12 +57,12 @@ jobs:
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
-      run: cargo build
+      run: cargo build --release --no-default-features --all-features
       
     # Upload the executable binary file
     - name: Upload the build
       uses: actions/upload-artifact@v3
       with:
         name: CS-FW Build
-        path: /home/runner/work/cs-fw/cs-fw/target/debug/csfw
+        path: /home/runner/work/cs-fw/cs-fw/target/release/csfw
         if-no-files-found: error
