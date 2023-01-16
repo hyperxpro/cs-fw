@@ -22,11 +22,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    # Cache Cargo files
-    - uses: Swatinem/rust-cache@v2
-      with:
-        key: ${{ runner.os }}-cargo-cache
     
     # We need Rust 1.62 to compile cargo-bpf because it is compiled with LLVM 14
     # but Rust 1.65+ is compiled with LLVM 15. To prevent conflict of LLVM versions,
@@ -38,6 +33,19 @@ jobs:
       run: |
         wget -O rustup-init.sh https://sh.rustup.rs/
         sh rustup-init.sh --default-toolchain=1.62.0 -y
+
+    - name: Set up cargo cache
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/            
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-
     
     # Install elf-dev and pkg-config packages
     - name: Install Packages
