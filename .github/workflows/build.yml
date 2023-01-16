@@ -52,12 +52,12 @@ jobs:
     - name: Build CS-FW Probes
       run: |
         cd probes
-        cargo build
-        cargo bpf build --target-dir=../target
+        cargo build -j 8
+        cargo bpf build -j 8 --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
-      run: cargo build --release --no-default-features --all-features
+      run: cargo build -j 8 --release --no-default-features
       
     # Upload the executable binary file
     - name: Upload the build
