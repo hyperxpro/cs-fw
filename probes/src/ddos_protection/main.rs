@@ -102,23 +102,23 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
 
     // Drop Packets from common UDP amplifiers
     match sport {
-        19 |    // chargen
-        6881 |  // bittorrent
-        389 |   // ldap
-        53 |    // dns
-        751 |   // kerberos
-        11211 | // memcached
-        1434 |  // ms-sql-s
-        5353 |  // mdns
-        137 |   // netbios-ns
-        123 |   // ntp
-        111 |   // rpcbind
         17 |    // tftp
-        27960 | // quake
-        520 |   // rip
+        19 |    // chargen
+        53 |    // dns
+        111 |   // rpcbind
+        123 |   // ntp
+        137 |   // netbios-ns
         161 |   // snmp
-        // ssdp
-        1900 => return Ok(XdpAction::Drop),
+        389 |   // ldap
+        520 |   // rip
+        751 |   // kerberos
+        1434 |  // ms-sql-s
+        1900 |  // ssdp
+        5353 |  // mdns
+        6881 |  // bittorrent
+        11211 | // memcached
+        // quake
+        27960 => return Ok(XdpAction::Drop),
         _ => (),
     }
 
