@@ -71,10 +71,13 @@ fn main() -> Result<(), String> {
         port: (args.proxy.port() as u32).to_le(),
     };
 
-    let proxy_map = HashMap::<SAddrV4, u8>::new(loaded.map("PROXYLIST").expect("PROXYLIST map not found")).unwrap();
-    proxy_map.set(proxy, /* dummy value */ 0);
+    // Map the Server Address to the map
+    HashMap::<SAddrV4, u8>::new(loaded.map("SERVERLIST")
+        .expect("SERVERLIST map not found"))
+        .unwrap()
+        .set(proxy, /* dummy value */ 0);
 
-    println!( "Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode );
+    println!("Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode);
     
     for program in loaded.xdps_mut() {
         program.attach_xdp(&args.interface, xdp_mode)

@@ -45,7 +45,7 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 }
 
 #[map]
-static mut PROXYLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(1_00_000);
+static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(1_00_000);
@@ -87,6 +87,19 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
 
     drop(transport);
 
+    let source_socket_address = SAddrV4 { addr: source_address, port: sport as u32 };
+    let destination_socket_address = SAddrV4 { addr: destination_address, port: dport as u32 };
+
+    // If packet is going from server to client, we will pass it.
+    if unsafe {SERVERLIST.get(&source_socket_address)}.is_some() {
+        return Ok(XdpAction::Pass);
+    }
+
+    // If packet is not destined to a server, we will pass it.
+    if unsafe {SERVERLIST.get(&destination_socket_address)}.is_none() {
+        return Ok(XdpAction::Pass);
+    }
+
     // Drop Packets from common UDP amplifiers
     match sport {
         19 |    // chargen
@@ -107,19 +120,6 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         // ssdp
         1900 => return Ok(XdpAction::Drop),
         _ => (),
-    }
-
-    let source_socket_address = SAddrV4 { addr: source_address, port: sport as u32 };
-    let destination_socket_address = SAddrV4 { addr: destination_address, port: dport as u32 };
-
-    if unsafe { PROXYLIST.get(&source_socket_address) }.is_some() {
-        // It is going from a proxy, so Pass
-        return Ok(XdpAction::Pass);
-    }
-
-    if unsafe { PROXYLIST.get(&destination_socket_address) }.is_none() {
-        // It is not going to a proxy, so Pass
-        return Ok(XdpAction::Pass);
     }
 
     let data = ctx.data()?;
