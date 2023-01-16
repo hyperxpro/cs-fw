@@ -101,26 +101,23 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     }
 
     // Drop Packets from common UDP amplifiers
-/*    match sport {
-        17 |    // tftp
-        19 |    // chargen
-        53 |    // dns
-        111 |   // rpcbind
-        123 |   // ntp
-        137 |   // netbios-ns
-        161 |   // snmp
-        389 |   // ldap
-        520 |   // rip
-        751 |   // kerberos
-        1434 |  // ms-sql-s
-        1900 |  // ssdp
-        5353 |  // mdns
-        6881 |  // bittorrent
-        11211 | // memcached
-        // quake
-        27960 => return Ok(XdpAction::Drop),
-        _ => (),
-    }*/
+    if sport ==  17 ||    // tftp
+        sport == 19 ||    // chargen
+        sport ==  53 ||   // dns
+        sport ==  111 ||  // rpcbind
+        sport ==  123 ||  // ntp
+        sport ==  137 ||  // netbios-ns
+        sport ==  161 ||  // snmp
+        sport ==  389 ||  // ldap
+        sport == 520 ||   // rip
+        sport == 751 ||   // kerberos
+        sport == 1434 ||  // ms-sql-s
+        sport == 1900 ||  // ssdp
+        sport == 5353 ||  // mdns
+        sport == 6881 ||  // bittorrent
+        sport == 11211 {  // memcached
+        return Ok(XdpAction::Drop);
+    }
 
     let data = ctx.data()?;
     let payload_len = data.len();
