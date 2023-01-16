@@ -59,7 +59,7 @@ fn main() -> Result<(), String> {
         std::process::exit(1);
     }
 
-    let xdp_mode = xdp::Flags::XDP_FLAGS_SKB_MODE;
+    let xdp_mode = xdp::Flags::default;
 
     let mut loaded = Loader::load(probe_code()).map_err(|err| {
         dbg!(&err);
