@@ -22,27 +22,44 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    # We need Rust 1.62 to compile cargo-bpf because it is compiled with LLVM 14
+    # but Rust 1.65+ is compiled with LLVM 15. To prevent conflict of LLVM versions,
+    # we will remove Rust 1.66 (or the latest Rust) which comes packed with GitHub Actions
+    # and manually install Rust 1.62.
     - name: Remove Latest Rust
       run: rustup self uninstall -y
     - name: Install Rust 1.62.0
       run: |
         wget -O rustup-init.sh https://sh.rustup.rs/
         sh rustup-init.sh --default-toolchain=1.62.0 -y
+    
+    # Install elf-dev and pkg-config packages
     - name: Install Packages
       run: sudo apt install libelf-dev pkg-config -qy
+      
+    # Install LLVM 14 and Clang for compiling cargo-bpf
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v1
       with:
        version: "14"
+       
+    # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
       run: cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
+      
+    # Build CS-FW Probes first
     - name: Build CS-FW Probes
       run: |
         cd probes
         cargo build
         cargo bpf build --target-dir=../target
+    
+    # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
       run: cargo build
+      
+    # Upload the executable binary file
     - name: Upload the build
       uses: actions/upload-artifact@v3
       with:
