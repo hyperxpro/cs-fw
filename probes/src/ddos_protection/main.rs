@@ -101,7 +101,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     }
 
     // Drop Packets from common UDP amplifiers
-    match sport {
+/*    match sport {
         17 |    // tftp
         19 |    // chargen
         53 |    // dns
@@ -120,7 +120,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         // quake
         27960 => return Ok(XdpAction::Drop),
         _ => (),
-    }
+    }*/
 
     let data = ctx.data()?;
     let payload_len = data.len();
