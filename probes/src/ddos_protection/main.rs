@@ -100,7 +100,6 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Pass);
     }
 
-    // Drop Packets from common UDP amplifiers
     if sport ==  17 ||    // tftp
         sport == 19 ||    // chargen
         sport ==  53 ||   // dns
