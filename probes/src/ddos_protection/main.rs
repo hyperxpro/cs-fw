@@ -128,24 +128,24 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     let payload = data.slice(STEAM_PACKET_START.len() + 1)?;
     let is_steam_packet = starts_with(payload, STEAM_PACKET_START);
 
-    let is_query_request_packet = match payload[4] {
-        0x54 => true, // A2S_INFO_REQUEST
-        0x56 => true, // A2S_RULES_REQUEST
-        0x55 => true, // A2S_PLAYERS_REQUEST
-        _ => false,
-    };
-
-    // A2S_RESPONSES ATTACK
-    let is_illegitimate_request_packet = match payload[4] {
-        0x49 => true, // A2S_INFO_RESPONSE
-        0x45 => true, // A2S_RULES_RESPONSE
-        0x44 => true, // A2S_PLAYERS_RESPONSE
-        0x6d => true, // CSGO_UNKNOWN1_RESPONSE
-        0x4c => true, // YOU_ARE_BANNED_RESPONSE
-        _ => false,
-    };
-
     if is_steam_packet {
+        let is_query_request_packet = match payload[4] {
+            0x54 => true, // A2S_INFO_REQUEST
+            0x56 => true, // A2S_RULES_REQUEST
+            0x55 => true, // A2S_PLAYERS_REQUEST
+            _ => false,
+        };
+
+        // A2S_RESPONSES ATTACK
+        let is_illegitimate_request_packet = match payload[4] {
+            0x49 => true, // A2S_INFO_RESPONSE
+            0x45 => true, // A2S_RULES_RESPONSE
+            0x44 => true, // A2S_PLAYERS_RESPONSE
+            0x6d => true, // CSGO_UNKNOWN1_RESPONSE
+            0x4c => true, // YOU_ARE_BANNED_RESPONSE
+            _ => false,
+        };
+
         if is_query_request_packet {
             return Ok(XdpAction::Pass);
         } else if is_illegitimate_request_packet {
