@@ -59,7 +59,12 @@ jobs:
        
     # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
-      run: cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
+      run: | 
+        if [ -e "target/cargo-bpf" ]; then
+          echo "Binary already exists, skipping build step."
+        else
+          cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
+        fi
       
     # Build CS-FW Probes first
     - name: Build CS-FW Probes
