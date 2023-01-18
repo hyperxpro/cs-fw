@@ -69,7 +69,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     // We will drop it to prevent tear drop attack. This is not safe but if server is only
     // handling game server traffic then it should be fine. If you are handling other traffic
     // also then you should not use this.
-    if iph.fragment_offset() != 0 && iph.more_fragments() {
+    if iph.fragment_offset() != 0 {
         return Ok(XdpAction::Drop);
     }
 
