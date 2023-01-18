@@ -56,8 +56,16 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
        version: "14"
-       
-    # Build Cargo-BPF from Git source
+
+    # Upload the executable binary file
+    - name: Upload the build
+      uses: actions/upload-artifact@v3
+      with:
+        name: CS-FW Build
+        path: /home/runner/work/cs-fw/
+        if-no-files-found: error
+
+      # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
       run: | 
         if [ -e "target/cargo-bpf" ]; then
