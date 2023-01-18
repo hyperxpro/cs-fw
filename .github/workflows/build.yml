@@ -62,7 +62,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: CS-FW Build
-        path: /home/runner/work/cs-fw/
+        path: /home/runner/work/cs-fw/cs-fw/target
         if-no-files-found: error
 
       # Build Cargo-BPF from Git source
