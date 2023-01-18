@@ -57,18 +57,10 @@ jobs:
       with:
        version: "14"
 
-    # Upload the executable binary file
-    - name: Upload the build
-      uses: actions/upload-artifact@v3
-      with:
-        name: CS-FW Build
-        path: /home/runner/work/cs-fw/cs-fw/target
-        if-no-files-found: error
-
       # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
       run: | 
-        if [ -e "target/cargo-bpf" ]; then
+        if [ -e "bpf/release" ]; then
           echo "Binary already exists, skipping build step."
         else
           cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
