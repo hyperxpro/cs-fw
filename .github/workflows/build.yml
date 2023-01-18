@@ -60,9 +60,7 @@ jobs:
       # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
       run: | 
-        if [ -d "bpf/release" ]; then
-          echo "Binary already exists, skipping build step."
-        else
+        if [ ! -d "bpf/release" ]; then
           cargo install cargo-bpf
         fi
       
