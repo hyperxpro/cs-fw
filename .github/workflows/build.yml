@@ -60,7 +60,7 @@ jobs:
       # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
       run: | 
-        if [ ! -d "bpf/release" ]; then
+        if [ ! -d "target/bpf/release" ]; then
           cargo install cargo-bpf
         fi
       
