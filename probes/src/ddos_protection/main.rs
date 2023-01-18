@@ -65,6 +65,14 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         return Err(NetworkError::NoIPHeader);
     };
 
+    // If fragment offset is not zero and has more fragments flag then it is a fragment packet.
+    // We will drop it to prevent tear drop attack. This is not safe but if server is only
+    // handling game server traffic then it should be fine. If you are handling other traffic
+    // also then you should not use this.
+    if iph.fragment_offset() != 0 && iph.more_fragments() {
+        return Ok(XdpAction::Drop);
+    }
+
     // We only care about IPv4 packets. We will pass IPv6 packets seamlessly.
     if iph.version() != 4 {
         return Ok(XdpAction::Pass);
