@@ -62,7 +62,8 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     let iph = if let Some(iph) = unsafe { ctx.ip()?.as_ref() } {
         iph
     } else {
-        return Err(NetworkError::NoIPHeader);
+        // Not an IP packet. Pass it on.
+        return Ok(XdpAction::Pass);
     };
 
     // If fragment offset is not zero and has more fragments flag then it is a fragment packet.
