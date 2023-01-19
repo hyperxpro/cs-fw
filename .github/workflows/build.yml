@@ -36,6 +36,7 @@ jobs:
         sh rustup-init.sh --default-toolchain=1.62.0 -y
 
     - name: Set up cargo cache
+      id: cache-cargo
       uses: actions/cache@v3
       continue-on-error: false
       with:
@@ -59,6 +60,7 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
        version: "14"
+       cached: ${{ steps.cache-cargo.outputs.cache-hit }}
 
       # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
