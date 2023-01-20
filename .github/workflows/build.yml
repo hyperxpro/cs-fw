@@ -75,18 +75,20 @@ jobs:
         else
           cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
         fi
-      
-    # Build CS-FW Probes first
+
+    # Build CS-FW Probes
     - name: Build CS-FW Probes
-      run: |
-        cd probes
-        cargo build
-        cargo bpf build --target-dir=../target
+      if: steps.cache-primes.outputs.cache-hit != 'true'
+      run: cd probes && cargo build
+
+    # Build CS-FW Probes BPF Module
+    - name: Build CS-FW Probes
+      run: cd probes && cargo bpf build --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
       run: cargo build
-      
+
     # Upload the executable binary file
     - name: Upload the build
       uses: actions/upload-artifact@v3
