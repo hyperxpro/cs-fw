@@ -80,12 +80,8 @@ jobs:
     - name: Build CS-FW Probes
       run: |
         cd probes
-        if [ ! -z "${{ steps.cache-cargo.outputs.cache-hit }}" ] ; then
-          cargo build
-          cargo bpf build --target-dir=../target
-        else
-          cargo build --target-dir=../target
-        fi
+        cargo build
+        cargo bpf build --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
