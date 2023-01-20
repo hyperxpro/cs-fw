@@ -22,7 +22,7 @@ use redbpf_probes::net::Transport;
 use redbpf_probes::maps::{LruHashMap, HashMap};
 use redbpf_probes::xdp::prelude::*;
 
-use probes::ddos_protection::SAddrV4;
+use probes::ddos_protection::{Cidr, SAddrV4};
 
 program!(0xFFFFFFFE, "GPL");
 
@@ -48,6 +48,9 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
+static mut ALLOWED_LIST: HashMap<Cidr, Cidr> = HashMap::with_max_entries(256);
+
+#[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_00_000);
 
 #[map]
@@ -58,7 +61,7 @@ pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
 pub static PACKET2_START:      [u8; 9] = *b"\xff\xff\xff\xff\x63\x6f\x6e\x6e\x65";
 
 #[xdp]
-pub fn filter(ctx: XdpContext) -> XdpResult {
+pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     let iph = if let Some(iph) = unsafe { ctx.ip()?.as_ref() } {
         iph
     } else {
@@ -112,6 +115,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Pass);
     }
 
+    // Drop common UDP amplification source ports
     if sport ==  17 ||    // tftp
         sport == 19 ||    // chargen
         sport ==  53 ||   // dns

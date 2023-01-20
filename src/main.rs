@@ -15,9 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+use std::io::BufRead;
 use clap::Parser;
 use redbpf::{load::Loader, xdp, HashMap};
-use std::net::SocketAddrV4;
+use std::net::{Ipv4Addr, SocketAddrV4};
+use std::str::FromStr;
 
 /// Attach eBPF probes to deal with DDOS
 #[derive(Parser, Debug)]
@@ -37,6 +39,13 @@ struct Args {
 pub struct SAddrV4 {
     pub addr: u32,
     pub port: u32,
+}
+
+// Define a struct to hold the CIDR address and mask
+#[repr(C, packed)]
+struct Cidr {
+    addr: u32,
+    mask: u32,
 }
 
 fn probe_code() -> &'static [u8] {
@@ -65,6 +74,30 @@ fn main() -> Result<(), String> {
         dbg!(&err);
         format!("{:?}", err)
     })?;
+
+    // Map the CIDR addresses into ALLOWED LIST
+    let allowed_list::<u32, Cidr> = HashMap::new(loaded.map("ALLOWED_LIST")
+        .expect("ALLOWED_LIST map not found"))
+        .unwrap();
+
+    // Read CIDR from file
+    let file = std::fs::File::open("/root/cidr.txt").unwrap();
+    let cidrs: Vec<Cidr> = std::io::BufReader::new(file)
+        .lines()
+        .map(|line| {
+            let parts: Vec<&str> = line.unwrap().split('/').collect();
+            let addr = Ipv4Addr::from_str(parts[0]).unwrap();
+            let mask = parts[1].parse::<u8>().unwrap();
+            let addr: u32 = u32::from(addr);
+            let mask: u32 = !(0xffffffff >> mask);
+            Cidr {addr, mask}
+        })
+        .collect();
+
+    // Insert CIDRs into the HashMap
+    for cidr in cidrs {
+        allowed_list.set(&cidr.addr, &cidr).unwrap();
+    }
 
     let proxy = SAddrV4 {
         addr: u32::from_ne_bytes(args.proxy.ip().octets()).to_le(),
