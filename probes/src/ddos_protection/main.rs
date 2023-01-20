@@ -48,7 +48,7 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
-static mut ALLOWED_LIST: HashMap<Cidr, Cidr> = HashMap::with_max_entries(256);
+static mut ALLOWED_LIST: HashMap<u32, Cidr> = HashMap::with_max_entries(256);
 
 #[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_00_000);

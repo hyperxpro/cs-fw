@@ -76,7 +76,7 @@ fn main() -> Result<(), String> {
     })?;
 
     // Map the CIDR addresses into ALLOWED LIST
-    let allowed_list::<u32, Cidr> = HashMap::new(loaded.map("ALLOWED_LIST")
+    let allowed_list = HashMap::<&u32, Cidr>::new(loaded.map("ALLOWED_LIST")
         .expect("ALLOWED_LIST map not found"))
         .unwrap();
 
@@ -96,7 +96,7 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        allowed_list.set(&cidr.addr, &cidr).unwrap();
+        allowed_list.set(&cidr.addr, cidr).unwrap();
     }
 
     let proxy = SAddrV4 {
