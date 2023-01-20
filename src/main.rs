@@ -97,7 +97,7 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        allowed_list.set(&cidr.addr, cidr).unwrap();
+        allowed_list.set(&cidr.addr, cidr);
     }
 
     let proxy = SAddrV4 {
