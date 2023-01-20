@@ -79,7 +79,7 @@ jobs:
     - name: Build CS-FW Probes
       run: |
         cd probes
-        cargo bpf build --target-dir=../target
+        cargo build --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
