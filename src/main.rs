@@ -77,7 +77,7 @@ fn main() -> Result<(), String> {
     })?;
 
     // Map the CIDR addresses into ALLOWED LIST
-    let allowed_list = HashMap::<&u32, Cidr>::new(loaded.map("ALLOWED_LIST")
+    let allowed_list = HashMap::<u32, Cidr>::new(loaded.map("ALLOWED_LIST")
         .expect("ALLOWED_LIST map not found"))
         .unwrap();
 
@@ -86,7 +86,7 @@ fn main() -> Result<(), String> {
     let cidrs: Vec<Cidr> = std::io::BufReader::new(file)
         .lines()
         .map(|line| {
-            let parts: Vec<&str> = line.unwrap().split('/').collect();
+            let parts: Vec<&str> = line.unwrap().splitn(2, '/').collect();
             let addr = Ipv4Addr::from_str(parts[0]).unwrap();
             let mask = parts[1].parse::<u8>().unwrap();
             let addr: u32 = u32::from(addr);
@@ -97,7 +97,7 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        allowed_list.set(&cidr.addr, cidr);
+        allowed_list.set(cidr.addr, cidr);
     }
 
     let proxy = SAddrV4 {
