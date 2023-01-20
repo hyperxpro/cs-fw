@@ -73,7 +73,7 @@ pub fn filter(ctx: XdpContext) -> XdpResult {
     let ip_mf: u16 = 0x2000;
     let ip_offmask: u16 = 0x1fff;
 
-    if (iph.frag_off & (ip_mf | ip_offmask)) != 0 {
+    if (iph.frag_off & (ip_mf | ip_offmask)) == 0 {
         return Ok(XdpAction::Drop);
     }
 
