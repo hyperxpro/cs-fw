@@ -35,7 +35,6 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          probes/target/
           llvm/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-
