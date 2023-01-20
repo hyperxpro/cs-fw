@@ -85,8 +85,8 @@ fn main() -> Result<(), String> {
     let file = std::fs::File::open("/root/cidr.txt").unwrap();
     let cidrs: Vec<Cidr> = std::io::BufReader::new(file)
         .lines()
-        .map(|line| {
-            let parts: Vec<&str> = line.unwrap().splitn(2, '/').collect();
+        .map_or_else(|_| vec![], |lines| {
+            let parts: Vec<&str> = line.map().splitn(2, '/').collect();
             let addr = Ipv4Addr::from_str(parts[0]).unwrap();
             let mask = parts[1].parse::<u8>().unwrap();
             let addr: u32 = u32::from(addr);
