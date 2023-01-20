@@ -42,6 +42,7 @@ pub struct SAddrV4 {
 }
 
 // Define a struct to hold the CIDR address and mask
+#[derive(Clone, Copy)]
 #[repr(C, packed)]
 struct Cidr {
     addr: u32,
