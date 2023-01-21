@@ -36,7 +36,17 @@ jobs:
           llvm/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-
-    
+
+    # If Cache was hit then maybe we have Rust 1.62 already installed.
+    # We will try to load it. If it fails, we will install it in next step.
+    - name: Try to load Rust 1.62
+      if: steps.cache-cargo.outputs.cache-hit == 'true'
+      run: |
+        if [[ -f "$HOME/.cargo/env" ]]; then
+          echo "Existing cargo env exists; loading it"
+          source "$HOME/.cargo/env"
+        fi
+
     # We need Rust 1.62 to compile cargo-bpf because it is compiled with LLVM 14
     # but Rust 1.65+ is compiled with LLVM 15. To prevent conflict of LLVM versions,
     # we will remove Rust 1.66 (or the latest Rust) which comes packed with GitHub Actions
