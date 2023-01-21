@@ -25,8 +25,8 @@ pub struct SAddrV4 {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub struct Cidr {
-    addr: u32,
-    mask: u32,
+    pub addr: u32,
+    pub mask: u32,
 }
 
 // SPDX-License-Identifier: GPL-3.0

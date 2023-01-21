@@ -134,6 +134,13 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Drop);
     }
 
+    // Check if packet's source address is present in HashMap
+    if let Some(cidr) = ALLOWED_LIST.get(&source_address) {
+        if source_address & cidr.mask == cidr.addr {
+            return Ok(XdpAction::Drop);
+        }
+    }
+
     let data = ctx.data()?;
     let payload_len = data.len();
 
