@@ -82,7 +82,7 @@ jobs:
       run: cd probes && cargo build && cargo bpf build --target-dir=../target
 
     # Build CS-FW Probes BPF Module
-    - name: Build CS-FW Probes
+    - name: Build CS-FW Probes Only
       if: steps.cache-cargo.outputs.cache-hit == 'true'
       run: cd probes && cargo build --target-dir=../target
     
