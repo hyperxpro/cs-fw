@@ -22,7 +22,7 @@ use redbpf_probes::net::Transport;
 use redbpf_probes::maps::{LruHashMap, HashMap};
 use redbpf_probes::xdp::prelude::*;
 
-use probes::ddos_protection::{Cidr, SAddrV4};
+use probes::ddos_protection::{SAddrV4};
 
 program!(0xFFFFFFFE, "GPL");
 
@@ -138,8 +138,10 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     }
 
     // Iterate over all netmask in HashMap.
-    for netmask in NETMASK {
-        let masked_addr :u32 = Ipv4Addr::from(source_address.octets() & (netmask as u8));
+    for (netmask, dummy) in NETMASK.into_iter() {
+        let addr = Ipv4Addr::from(source_address);
+        let addr :u32 = u32::from(addr);
+        let masked_addr = addr & (netmask as u8);
 
         // Check if packet's source address is present in HashMap
         if CIDR.get(&masked_addr).is_none() {
