@@ -81,11 +81,6 @@ fn main() -> Result<(), String> {
         .expect("CIDR map not found"))
         .unwrap();
 
-    // Netmask map
-    let netmask_map = HashMap::<u32, u8>::new(loaded.map("NETMASK")
-        .expect("NETMASK map not found"))
-        .unwrap();
-
     // Read CIDR from file
     let file = std::fs::File::open("/root/cidr.txt").unwrap();
     let cidrs: Vec<Cidr> = std::io::BufReader::new(file)
