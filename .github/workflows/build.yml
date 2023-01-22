@@ -115,3 +115,5 @@ jobs:
         aws-region: ap-south-1
         file-path: '/home/runner/work/cs-fw/cs-fw/target/debug/csfw'
         public: true
+        bucket-root: /
+        destination-dir: /
