@@ -76,9 +76,14 @@ fn main() -> Result<(), String> {
         format!("{:?}", err)
     })?;
 
-    // Map the CIDR addresses into ALLOWED LIST
-    let allowed_list = HashMap::<u32, Cidr>::new(loaded.map("ALLOWED_LIST")
-        .expect("ALLOWED_LIST map not found"))
+    // Map the CIDR addresses into CIDR map
+    let cidrMap = HashMap::<u32, u8>::new(loaded.map("CIDR")
+        .expect("CIDR map not found"))
+        .unwrap();
+
+    // Netmask map
+    let netmaskMap = HashMap::<u32, u8>::new(loaded.map("NETMASK")
+        .expect("NETMASK map not found"))
         .unwrap();
 
     // Read CIDR from file
@@ -99,7 +104,12 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        allowed_list.set(cidr.addr, cidr);
+        cidrMap.set(cidr.addr, 0);
+
+        // Insert the netmask into the map if it doesn't exist.
+        if netmaskMap.get(cidr.mask).is_none() {
+            netmaskMap.set(cidr.mask, 0);
+        }
     }
 
     let proxy = SAddrV4 {

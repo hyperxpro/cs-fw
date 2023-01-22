@@ -22,11 +22,4 @@ pub struct SAddrV4 {
     pub port: u32, // u32 instead of u16 to align properly
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(C)]
-pub struct Cidr {
-    pub addr: u32,
-    pub mask: u32,
-}
-
 // SPDX-License-Identifier: GPL-3.0

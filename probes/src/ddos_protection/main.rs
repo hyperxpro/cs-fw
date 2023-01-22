@@ -48,7 +48,10 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
-static mut ALLOWED_LIST: HashMap<u32, Cidr> = HashMap::with_max_entries(256);
+static mut CIDR: HashMap<Ipv4Addr, DummyValue> = HashMap::with_max_entries(256);
+
+#[map]
+static mut NETMASK: HashMap<Ipv4Addr, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_00_000);
@@ -134,9 +137,12 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Drop);
     }
 
-    // Check if packet's source address is present in HashMap
-    if let Some(cidr) = ALLOWED_LIST.get(&source_address) {
-        if source_address & cidr.mask == cidr.addr {
+    // Iterate over all netmask in HashMap.
+    for netmask in NETMASK {
+        let masked_addr = source_address & netmask;
+
+        // Check if packet's source address is present in HashMap
+        if CIDR.get(masked_addr).is_none() {
             return Ok(XdpAction::Drop);
         }
     }
