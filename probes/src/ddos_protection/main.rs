@@ -64,7 +64,7 @@ pub static PACKET1_START:      [u8; 6] = *b"\xff\xff\xff\xff\x67\x65";
 pub static PACKET2_START:      [u8; 9] = *b"\xff\xff\xff\xff\x63\x6f\x6e\x6e\x65";
 
 #[xdp]
-pub fn filter(ctx: XdpContext) -> XdpResult {
+pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     let iph = if let Some(iph) = unsafe { ctx.ip()?.as_ref() } {
         iph
     } else {
