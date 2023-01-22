@@ -138,9 +138,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     for i in (0..33).rev() {
         let mask: u32 = !(0xffffffff >> 32 - i);
 
-        let addr = Ipv4Addr::from(source_address);
-        let addr :u32 = u32::from(addr);
-        let masked_addr = addr & mask;
+        let masked_addr = source_address & mask;
 
         // Check if packet's source address is present in HashMap
         if CIDR.get(&masked_addr).is_none() {
