@@ -77,12 +77,12 @@ fn main() -> Result<(), String> {
     })?;
 
     // Map the CIDR addresses into CIDR map
-    let cidrMap = HashMap::<u32, u8>::new(loaded.map("CIDR")
+    let cidr_map = HashMap::<u32, u8>::new(loaded.map("CIDR")
         .expect("CIDR map not found"))
         .unwrap();
 
     // Netmask map
-    let netmaskMap = HashMap::<u32, u8>::new(loaded.map("NETMASK")
+    let netmask_map = HashMap::<u32, u8>::new(loaded.map("NETMASK")
         .expect("NETMASK map not found"))
         .unwrap();
 
@@ -104,11 +104,11 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        cidrMap.set(cidr.addr, 0);
+        cidr_map.set(cidr.addr, 0);
 
         // Insert the netmask into the map if it doesn't exist.
-        if netmaskMap.get(cidr.mask).is_none() {
-            netmaskMap.set(cidr.mask, 0);
+        if netmask_map.get(cidr.mask).is_none() {
+            netmask_map.set(cidr.mask, 0);
         }
     }
 
