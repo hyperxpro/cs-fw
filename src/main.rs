@@ -88,9 +88,9 @@ fn main() -> Result<(), String> {
         .filter_map(|line| {
             line.ok().and_then(|l| {
                 let parts: Vec<&str> = l.splitn(2, '/').collect();
-                let addr = Ipv4Addr::from_str(parts[0]).ok()?;
+                let addr = SocketAddrV4::from_str(parts[0]).ok()?;
                 let mask = parts[1].parse::<u8>().ok()?;
-                let addr: u32 = u32::from(addr);
+                let addr: u32 = u32::from_ne_bytes(addr.ip().octets()).to_le();
                 let mask: u32 = !(0xffffffff >> mask);
                 Some(Cidr {addr, mask})
             })
