@@ -139,10 +139,10 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
 
     // Iterate over all netmask in HashMap.
     for netmask in NETMASK {
-        let masked_addr = source_address & netmask;
+        let masked_addr :u32 = Ipv4Addr::from(source_address.octets() & (netmask as u8));
 
         // Check if packet's source address is present in HashMap
-        if CIDR.get(masked_addr).is_none() {
+        if CIDR.get(&masked_addr).is_none() {
             return Ok(XdpAction::Drop);
         }
     }
