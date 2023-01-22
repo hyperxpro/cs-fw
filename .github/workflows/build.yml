@@ -89,7 +89,7 @@ jobs:
 
     # Build CS-FW Probes
     - name: Build CS-FW Probes
-      if: steps.cache-cargo.outputs.cache-hit != 'true'
+      if: steps.cache-cargo.outputs.cache-hit == 'true'
       run: cd probes && cargo build --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
