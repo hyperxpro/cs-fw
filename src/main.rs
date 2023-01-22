@@ -104,12 +104,7 @@ fn main() -> Result<(), String> {
 
     // Insert CIDRs into the HashMap
     for cidr in cidrs {
-        cidr_map.set(cidr.addr, 0);
-
-        // Insert the netmask into the map if it doesn't exist.
-        if netmask_map.get(cidr.mask).is_none() {
-            netmask_map.set(cidr.mask, 0);
-        }
+        cidr_map.set(cidr.addr & cidr.mask, 0);
     }
 
     let proxy = SAddrV4 {

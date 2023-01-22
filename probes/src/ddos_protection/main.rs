@@ -51,9 +51,6 @@ static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(
 static mut CIDR: HashMap<Ipv4Addr, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
-static mut NETMASK: HashMap<Ipv4Addr, DummyValue> = HashMap::with_max_entries(256);
-
-#[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_00_000);
 
 #[map]
@@ -137,11 +134,13 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Drop);
     }
 
-    // Iterate over all netmask in HashMap.
-    for (netmask, dummy) in NETMASK.into_iter() {
+    // Iterate over all netmask from 0 to 32.
+    for i in (0..33).rev() {
+        let mask: u32 = !(0xffffffff >> 32 - i);
+
         let addr = Ipv4Addr::from(source_address);
         let addr :u32 = u32::from(addr);
-        let masked_addr = addr & (netmask as u8);
+        let masked_addr = addr & mask;
 
         // Check if packet's source address is present in HashMap
         if CIDR.get(&masked_addr).is_none() {
