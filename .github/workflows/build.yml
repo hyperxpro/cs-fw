@@ -105,6 +105,10 @@ jobs:
         path: /home/runner/work/cs-fw/cs-fw/target/debug/csfw
         if-no-files-found: error
 
+    # Create an empty folder and put the executable binary file in it.
+    - name: Prepare for S3 upload
+      run: cd target/debug && mkdir csfw-binary && cp csfw csfw-binary
+
       # Upload the executable binary file to S3
     - name: Upload the build to S3
       uses: shallwefootball/s3-upload-action@v1.2.0
