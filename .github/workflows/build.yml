@@ -14,7 +14,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_BUILD_JOBS: 8
+  CARGO_BUILD_JOBS: 12
 
 jobs:
   Build:
