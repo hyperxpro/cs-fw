@@ -14,7 +14,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_BUILD_JOBS: 12
+  CARGO_BUILD_JOBS: 6
 
 jobs:
   Build:
@@ -82,7 +82,7 @@ jobs:
           cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
         fi
 
-    # Build CS-FW Probes
+    # Build CS-FW Probes and Cargo BPF
     - name: Build CS-FW Probes and Cargo BPF
       if: steps.cache-cargo.outputs.cache-hit != 'true'
       run: cd probes && cargo bpf build --target-dir=../target
