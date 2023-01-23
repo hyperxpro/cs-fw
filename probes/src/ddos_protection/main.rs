@@ -136,7 +136,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
 
     // Iterate over all netmask from 0 to 32.
 
-    let drop_packet :bool;
+    let mut drop_packet :bool = true;
     for i in (0..33).rev() {
         let mask: u32 = !(0xffffffff >> i);
         let masked_addr = source_address & mask;
