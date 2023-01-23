@@ -154,7 +154,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Drop);
     }
 
-    return Ok(XdpAction::Drop);
+    return Ok(XdpAction::Pass);
 
 /*    let data = ctx.data()?;
     let payload_len = data.len();
