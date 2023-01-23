@@ -31,7 +31,6 @@ jobs:
       with:
         path: |
           ~/.cargo
-          target/
           llvm/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-
@@ -88,9 +87,9 @@ jobs:
       run: cd probes && cargo bpf build --target-dir=../target
 
     # Build CS-FW Probes
-    - name: Build CS-FW Probes
-      if: steps.cache-cargo.outputs.cache-hit == 'true'
-      run: cd probes && cargo build --target-dir=../target
+#    - name: Build CS-FW Probes
+#      if: steps.cache-cargo.outputs.cache-hit == 'true'
+#      run: cd probes && cargo build --target-dir=../target
     
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
