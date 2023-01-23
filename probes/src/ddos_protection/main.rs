@@ -151,7 +151,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
 
     // If 'drop_packet' is true then we will drop the packet.
     if drop_packet {
-        return Ok(XdpAction::Drop);
+        return Ok(XdpAction::Pass);
     }
 
     return Ok(XdpAction::Pass);
