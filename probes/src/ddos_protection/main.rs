@@ -135,18 +135,26 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     }
 
     // Iterate over all netmask from 0 to 32.
-    for i in (0..33).rev() {
-        let mask: u32 = !(0xffffffff >> 32 - i);
 
+    let drop_packet :bool;
+    for i in (0..33).rev() {
+        let mask: u32 = !(0xffffffff >> i);
         let masked_addr = source_address & mask;
 
-        // Check if packet's source address is present in HashMap
-        if CIDR.get(&masked_addr).is_none() {
-            return Ok(XdpAction::Pass);
+        // If address is present in HashMap then the IP is whitelisted.
+        // We will break the loop and pass the packet.
+        if CIDR.get(&masked_addr).is_some() {
+            drop_packet = false;
+            break;
         }
     }
 
-    return Ok(XdpAction::Drop);
+    // If 'drop_packet' is true then we will drop the packet.
+    if drop_packet {
+        return Ok(XdpAction::Drop);
+    }
+
+    return Ok(XdpAction::Pass);
 
 /*    let data = ctx.data()?;
     let payload_len = data.len();
