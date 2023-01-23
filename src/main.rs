@@ -18,7 +18,7 @@
 use std::io::BufRead;
 use clap::Parser;
 use redbpf::{load::Loader, xdp, HashMap};
-use std::net::{Ipv4Addr, SocketAddrV4};
+use std::net::{SocketAddrV4};
 use std::str::FromStr;
 
 /// Attach eBPF probes to deal with DDOS
