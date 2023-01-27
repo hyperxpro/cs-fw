@@ -83,17 +83,25 @@ fn main() -> Result<(), String> {
     HashMap::<SAddrV4, u8>::new(loaded.map("SERVERLIST")
         .expect("SERVERLIST map not found"))
         .unwrap()
-        .set(proxy, /* dummy value */ 0);
-
-    let xdp_mode = xdp::Flags::DrvMode;
-    println!("Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode);
+        .set(proxy, 0);
     
     for program in loaded.xdps_mut() {
-        program.attach_xdp(&args.interface, xdp_mode)
-            .map_err(|err| {
-                dbg!(&err);
-                format!("{:?}", err)
-            })?;
+        // First priority:  HwMode
+        // Second priority: DrvMode
+        // Third priority:  SkbMode
+        // Last priority:   Unset
+        let xdp_modes = [xdp::Flags::HwMode, xdp::Flags::DrvMode, xdp::Flags::SkbMode, xdp::Flags::default()];
+
+        // Try to attach the program to the interface
+        for xdp_mode in xdp_modes {
+            println!("Trying to attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode);
+
+            program.attach_xdp(&args.interface, xdp_mode)
+                .map_err(|err| {
+                    dbg!(&err);
+                    format!("{:?}", err)
+                })?;
+        }
     }
 
     // exit without calling destructors so the probe is not unloaded

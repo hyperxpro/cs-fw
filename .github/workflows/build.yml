@@ -26,18 +26,8 @@ jobs:
 
     - name: Set up Cargo Cache
       id: cache-cargo
-      uses: actions/cache@v3
+      uses: Swatinem/rust-cache@v2
       continue-on-error: false
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/  
-          llvm/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: ${{ runner.os }}-cargo-
 
     # If Cache was hit then maybe we have Rust 1.62 already installed.
     # We will try to load it. If it fails, we will install it in next step.
