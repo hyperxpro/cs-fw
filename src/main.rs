@@ -69,38 +69,10 @@ fn main() -> Result<(), String> {
         std::process::exit(1);
     }
 
-    let xdp_mode = xdp::Flags::DrvMode;
-
     let mut loaded = Loader::load(probe_code()).map_err(|err| {
         dbg!(&err);
         format!("{:?}", err)
     })?;
-
-    // Map the CIDR addresses into CIDR map
-    let cidr_map = HashMap::<u32, u8>::new(loaded.map("CIDR")
-        .expect("CIDR map not found"))
-        .unwrap();
-
-    // Read CIDR from file
-    let file = std::fs::File::open("/root/cidr.txt").unwrap();
-    let cidrs: Vec<Cidr> = std::io::BufReader::new(file)
-        .lines()
-        .filter_map(|line| {
-            line.ok().and_then(|l| {
-                let parts: Vec<&str> = l.splitn(2, '/').collect();
-                let addr = SocketAddrV4::from_str(parts[0]).ok()?;
-                let mask = parts[1].parse::<u8>().ok()?;
-                let addr: u32 = u32::from_ne_bytes(addr.ip().octets()).to_le();
-                let mask: u32 = !(0xffffffff >> mask);
-                Some(Cidr {addr, mask})
-            })
-        })
-        .collect();
-
-    // Insert CIDRs into the HashMap
-    for cidr in cidrs {
-        cidr_map.set(cidr.addr & cidr.mask, 0);
-    }
 
     let proxy = SAddrV4 {
         addr: u32::from_ne_bytes(args.proxy.ip().octets()).to_le(),
@@ -113,6 +85,7 @@ fn main() -> Result<(), String> {
         .unwrap()
         .set(proxy, /* dummy value */ 0);
 
+    let xdp_mode = xdp::Flags::DrvMode;
     println!("Attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode);
     
     for program in loaded.xdps_mut() {

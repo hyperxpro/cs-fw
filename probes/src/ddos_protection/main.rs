@@ -48,9 +48,6 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
 static mut SERVERLIST: HashMap<SAddrV4, DummyValue> = HashMap::with_max_entries(256);
 
 #[map]
-static mut CIDR: HashMap<Ipv4Addr, DummyValue> = HashMap::with_max_entries(256);
-
-#[map]
 static mut WHITELIST: LruHashMap<Ipv4Addr, DummyValue> = LruHashMap::with_max_entries(10_00_000);
 
 #[map]
@@ -62,23 +59,12 @@ pub static PACKET2_START:      [u8; 9] = *b"\xff\xff\xff\xff\x63\x6f\x6e\x6e\x65
 
 #[xdp]
 pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
-    let iph = if let Some(iph) = unsafe { ctx.ip()?.as_ref() } {
+    let iph = if let Some(iph) = ctx.ip()?.as_ref() {
         iph
     } else {
         // Not an IP packet. Pass it on.
         return Ok(XdpAction::Pass);
     };
-
-    // If fragment offset is not zero and has more fragments flag then it is a fragment packet.
-    // We will drop it to prevent tear drop attack. This is not safe but if server is only
-    // handling game server traffic then it should be fine. If you are handling other traffic
-    // also then you should not use this.
-    let ip_mf: u16 = 0x2000;
-    let ip_offmask: u16 = 0x1fff;
-
-    if (iph.frag_off & (ip_mf | ip_offmask)) == 0 {
-        return Ok(XdpAction::Drop);
-    }
 
     // We only care about IPv4 packets. We will pass IPv6 packets seamlessly.
     if iph.version() != 4 {
@@ -106,12 +92,8 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     let destination_socket_address = SAddrV4 { addr: destination_address, port: dport as u32 };
 
     // If packet is going from server to client, we will pass it.
-    if unsafe {SERVERLIST.get(&source_socket_address)}.is_some() {
-        return Ok(XdpAction::Pass);
-    }
-
     // If packet is not destined to a server, we will pass it.
-    if unsafe {SERVERLIST.get(&destination_socket_address)}.is_none() {
+    if SERVERLIST.get(&source_socket_address).is_some() || SERVERLIST.get(&destination_socket_address).is_none() {
         return Ok(XdpAction::Pass);
     }
 
@@ -134,29 +116,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Drop);
     }
 
-    // Iterate over all netmask from 0 to 32.
-
-    let mut drop_packet :bool = true;
-    for i in (0..33).rev() {
-        let mask: u32 = !(0xffffffff >> i);
-        let masked_addr = source_address & mask;
-
-        // If address is present in HashMap then the IP is whitelisted.
-        // We will break the loop and pass the packet.
-        if CIDR.get(&masked_addr).is_some() {
-            drop_packet = false;
-            break;
-        }
-    }
-
-    // If 'drop_packet' is true then we will drop the packet.
-    if drop_packet {
-        return Ok(XdpAction::Drop);
-    }
-
-    return Ok(XdpAction::Pass);
-
-/*    let data = ctx.data()?;
+    let data = ctx.data()?;
     let payload_len = data.len();
 
     if payload_len < (STEAM_PACKET_START.len() + 1) {
@@ -191,7 +151,7 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         }
     }
 
-    if unsafe { WHITELIST.get(&source_address) }.is_some() {
+    if WHITELIST.get(&source_address).is_some() {
         return Ok(XdpAction::Pass);
     }
 
@@ -203,9 +163,8 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     let is_packet1 = starts_with(payload, PACKET1_START);
 
     if is_packet1 {
-        return if unsafe { TEMPLIST.get(&source_address) }.is_none() {
-            let dummy_value = 0;
-            unsafe { TEMPLIST.set(&source_address, &dummy_value) };
+        return if TEMPLIST.get(&source_address).is_none() {
+            TEMPLIST.set(&source_address, &0);
             Ok(XdpAction::Pass)
         } else {
             Ok(XdpAction::Drop)
@@ -220,17 +179,16 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
     let is_packet2 = starts_with(payload, PACKET2_START);
 
     if is_packet2 {
-        return if unsafe { TEMPLIST.get(&source_address) }.is_some() {
-            unsafe { TEMPLIST.delete(&source_address) };
-            let dummy_value = 0;
-            unsafe { WHITELIST.set(&source_address, &dummy_value) };
+        return if TEMPLIST.get(&source_address).is_some() {
+            TEMPLIST.delete(&source_address);
+            WHITELIST.set(&source_address, &0);
             Ok(XdpAction::Pass)
         } else {
             Ok(XdpAction::Drop)
         }
     }
 
-    Ok(XdpAction::Drop)*/
+    return Ok(XdpAction::Drop);
 }
 
 // SPDX-License-Identifier: GPL-3.0

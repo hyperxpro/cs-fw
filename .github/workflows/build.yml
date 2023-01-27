@@ -24,13 +24,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up cargo cache
+    - name: Set up Cargo Cache
       id: cache-cargo
       uses: actions/cache@v3
       continue-on-error: false
       with:
         path: |
-          ~/.cargo
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/  
           llvm/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-
@@ -83,14 +87,8 @@ jobs:
 
     # Build CS-FW Probes and Cargo BPF
     - name: Build CS-FW Probes and Cargo BPF
-      if: steps.cache-cargo.outputs.cache-hit != 'true'
       run: cd probes && cargo bpf build --target-dir=../target
 
-    # Build CS-FW Probes
-#    - name: Build CS-FW Probes
-#      if: steps.cache-cargo.outputs.cache-hit == 'true'
-#      run: cd probes && cargo build --target-dir=../target
-    
     # Now finally CS-FW completely and generate executable binary
     - name: Build CS-FW
       run: cargo build
