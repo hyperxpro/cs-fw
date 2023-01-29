@@ -41,14 +41,6 @@ pub struct SAddrV4 {
     pub port: u32,
 }
 
-// Define a struct to hold the CIDR address and mask
-#[derive(Clone, Copy)]
-#[repr(C, packed)]
-struct Cidr {
-    addr: u32,
-    mask: u32,
-}
-
 fn probe_code() -> &'static [u8] {
     include_bytes!(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -94,14 +86,19 @@ fn main() -> Result<(), String> {
 
         // Try to attach the program to the interface
         for xdp_mode in xdp_modes {
-            println!("Trying to attach ddos_protection on interface: {} with mode {:?}", args.interface, xdp_mode);
+            println!("Trying to attach XDP program on interface: {} with mode {:?}", args.interface, xdp_mode);
 
-            program.attach_xdp(&args.interface, xdp_mode)
-                .map_err(|err| {
-                    dbg!(&err);
-                    format!("{:?}", err)
-                })?;
+            let result = program.attach_xdp(&args.interface, xdp_mode);
+            if result.is_ok() {
+                println!("Successfully attached XDP program on interface: {} with mode {:?}", args.interface, xdp_mode);
+                return Ok(());
+            } else {
+                println!("Failed to attach XDP program on interface: {} with mode {:?} with error: {:?}", args.interface, xdp_mode, result);
+            }
         }
+
+        println!("Failed to attach XDP program on interface with Modes (HwMode, DrvMode, SkbMode and Unset): {}", args.interface);
+        return Err("Error attaching XDP program".to_string());
     }
 
     // exit without calling destructors so the probe is not unloaded
