@@ -76,7 +76,7 @@ fn main() -> Result<(), String> {
         .expect("SERVERLIST map not found"))
         .unwrap()
         .set(proxy, 0);
-    
+
     for program in loaded.xdps_mut() {
         // First priority:  HwMode
         // Second priority: DrvMode
@@ -91,18 +91,17 @@ fn main() -> Result<(), String> {
             let result = program.attach_xdp(&args.interface, xdp_mode);
             if result.is_ok() {
                 println!("Successfully attached XDP program on interface: {} with mode {:?}", args.interface, xdp_mode);
-                return Ok(());
+
+                // exit without calling destructors so the probe is not unloaded
+                std::process::exit(0);
             } else {
                 println!("Failed to attach XDP program on interface: {} with mode {:?} with error: {:?}", args.interface, xdp_mode, result);
             }
         }
-
-        println!("Failed to attach XDP program on interface with Modes (HwMode, DrvMode, SkbMode and Unset): {}", args.interface);
-        return Err("Error attaching XDP program".to_string());
     }
 
-    // exit without calling destructors so the probe is not unloaded
-    std::process::exit(0);
+    println!("Failed to attach XDP program on interface with Modes (HwMode, DrvMode, SkbMode and Unset): {}", args.interface);
+    return Err("Error attaching XDP program".to_string());
 }
 
 // SPDX-License-Identifier: GPL-3.0
