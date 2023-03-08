@@ -61,7 +61,7 @@ jobs:
           rustup self uninstall -y
           
           wget -O rustup-init.sh https://sh.rustup.rs/
-          sh rustup-init.sh --default-toolchain=1.62.0 -y
+          sh rustup-init.sh --default-toolchain=1.60.0 -y
         fi
     
     # Install elf-dev and pkg-config packages
