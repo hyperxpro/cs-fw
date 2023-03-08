@@ -48,15 +48,15 @@ jobs:
           source "$HOME/.cargo/env"
         fi
 
-    # We need Rust 1.62 to compile cargo-bpf because it is compiled with LLVM 14
+    # We need Rust 1.60 to compile cargo-bpf because it is compiled with LLVM 14
     # but Rust 1.65+ is compiled with LLVM 15. To prevent conflict of LLVM versions,
     # we will remove Rust 1.66 (or the latest Rust) which comes packed with GitHub Actions
-    # and manually install Rust 1.62.
-    - name: Remove Latest Rust and Install Rust 1.62
+    # and manually install Rust 1.60.
+    - name: Remove Latest Rust and Install Rust 1.60
       run: |
         rust_version=$(rustc --version | awk '{print $2}')
-        if [[ "rust_version" == "1.62.0" ]]; then
-          echo "Rust 1.62.0 is already installed."
+        if [[ "rust_version" == "1.60.0" ]]; then
+          echo "Rust 1.60.0 is already installed."
         else
           rustup self uninstall -y
           
