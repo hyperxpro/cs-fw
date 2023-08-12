@@ -15,6 +15,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   CARGO_BUILD_JOBS: 6
+  LLVM_DIR: /home/runner/work/cs-fw/cs-fw/llvm
 
 jobs:
   Build:
@@ -73,8 +74,13 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1.7.0
       with:
        version: "14"
-       ubuntu-version: 20.04
+       ubuntu-version: 18.04
        cached: ${{ steps.cache-cargo.outputs.cache-hit }}
+
+    - name: Set LD_LIBRARY_PATH for LLVM
+      run: |
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{ env.LLVM_DIR }}/lib
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
       # Build Cargo-BPF from Git source
     - name: Build Cargo-BPF
