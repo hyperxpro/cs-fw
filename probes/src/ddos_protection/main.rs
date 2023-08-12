@@ -71,8 +71,8 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Pass);
     }
 
-    let source_address = iph.srcip;
-    let destination_address = iph.dstip;
+    let source_address = iph.saddr;
+    let destination_address = iph.daddr;
 
     drop(iph);
 
