@@ -18,11 +18,11 @@
 #![no_std]
 #![no_main]
 
+use redbpf_probes::maps::{HashMap, LruHashMap};
 use redbpf_probes::net::Transport;
-use redbpf_probes::maps::{LruHashMap, HashMap};
 use redbpf_probes::xdp::prelude::*;
 
-use probes::ddos_protection::{SAddrV4};
+use probes::ddos_protection::SAddrV4;
 
 program!(0xFFFFFFFE, "GPL");
 
@@ -33,7 +33,7 @@ const fn starts_with<const N: usize>(s: &[u8], needle: [u8; N]) -> bool {
     if s.len() < N {
         return false;
     }
-    
+
     let mut i = 0;
     while i < N {
         if s[i] != needle[i] {
@@ -71,8 +71,8 @@ pub unsafe fn filter(ctx: XdpContext) -> XdpResult {
         return Ok(XdpAction::Pass);
     }
 
-    let source_address = iph.saddr;
-    let destination_address = iph.daddr;
+    let source_address = iph.srcip;
+    let destination_address = iph.dstip;
 
     drop(iph);
 
