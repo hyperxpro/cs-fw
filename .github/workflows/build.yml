@@ -70,7 +70,7 @@ jobs:
       
     # Install LLVM 14 and Clang for compiling cargo-bpf
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1.7.0
+      uses: KyleMayes/install-llvm-action@v1.8.3
       with:
        version: "14"
        ubuntu-version: 18.04
