@@ -82,7 +82,7 @@ jobs:
         if [ -d "target/bpf/release" ]; then
           echo "Build already exists; skipping..."
         else
-          cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
+          cargo add libbpf-sys@0.6.2+v0.6.1 && cargo install cargo-bpf --git https://github.com/foniod/redbpf.git
         fi
 
     # Build CS-FW Probes and Cargo BPF
